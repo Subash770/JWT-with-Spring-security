@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.security.core.userdetails.UserDetails;
-
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import java.util.List;
 import java.util.Collection;
@@ -40,7 +40,9 @@ public class User implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(); // No roles for now
+        SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + role.getName().toString());
+            
+        return List.of(authority);
     }
 
     @Override
@@ -125,6 +127,21 @@ public class User implements UserDetails {
 
 	public String getEmail() {
 		return email;
+	}
+	
+	//update user role
+	@ManyToOne(cascade = CascadeType.REMOVE)
+	@JoinColumn(name = "role_id", referencedColumnName = "id", nullable = false)
+	private Role role;
+
+	public Role getRole() {
+	    return role;
+	}
+
+	public User setRole(Role role) {
+	    this.role = role;
+	    
+	    return this;
 	}
 
 }
