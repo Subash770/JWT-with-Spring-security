@@ -1,27 +1,44 @@
-# JWT Authentication in Spring Boot 3
+# Role-Based Access Control (RBAC) in Spring Boot 3
 
-This project demonstrates how to implement JSON Web Token (JWT) authentication in a Spring Boot 3 application. JWT provides a flexible and stateless way to secure API routes and verify user identities.
+Role-based Access Control (RBAC) is a security model that assigns permissions to users based on their roles. This enhances security, simplifies access management, and improves operational efficiency, especially in complex environments.
 
-## Features
+## Roles in the System
 
-### Public API Routes:
-1. **POST /auth/signup**: Register a new user.
-2. **POST /auth/login**: Authenticate a user.
+- **User:** Can access personal information.
+- **Administrator:** Can perform User role actions and access the users' list.
+- **Super Administrator:** Can perform Administrator role actions and create admin users; essentially has all permissions.
 
-### Protected API Routes (requires JWT authentication):
-3. **GET /users/me**: Retrieve the authenticated user.
-4. **GET /users**: Retrieve a list of users.
+## Protected Routes
 
-## Prerequisites
+| Route             | Roles                      | Description                          |
+|-------------------|----------------------------|--------------------------------------|
+| [GET] /users/me   | User, Admin, Super Admin   | Retrieve the authenticated user.     |
+| [GET] /users      | Admin, Super Admin         | Retrieve the list of all users.      |
+| [POST] /admins    | Super Admin                | Create an administrator.             |
 
-1. **JDK 11 or higher**
-2. **Maven 3.8 or higher**
-3. **MySQL** (Docker or local installation)
-4. **HTTP client** (Postman, Insomnia, cURL, etc.)
+## Implementation Steps
 
-## Setup Instructions
+1. **Protect API Routes for User and Admin Roles:**
+   - For `/users/me`: Use `@PreAuthorize("isAuthenticated()")`.
+   - For `/users`: Use `@PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")`.
+     - Since `/users/me` is accessible by all roles, only check if the user is authenticated.
 
-### Clone the repository:
-```bash
-git clone https://github.com/Subash770/JWT-with-Spring-security.git
+2. **Create the Role Entity and Data Access Layer:**
+   - Define a `Role` entity and its corresponding repository to manage roles in the database.
 
+3. **Associate the User Entity with Roles:**
+   - Establish a relationship between the `User` entity and the `Role` entity to link users with their roles.
+
+4. **Expose the User's Role in the Authentication Context:**
+   - Ensure the user's roles are included in the authentication token for easy access during authorization.
+
+5. **Enable Method Security in Spring Security:**
+   - Activate method-level security annotations in Spring Security to protect routes based on roles.
+
+6. **Protect API Routes with Method Security:**
+   - Use `isAuthenticated()` to check if the user is logged in.
+   - Use `hasRole()` or `hasAnyRole()` to authorize access based on roles.
+
+## Conclusion
+
+RBAC implementation in Spring Boot enhances security and simplifies permission management. By following the steps above, you can effectively secure your application's API routes and ensure that users access only the resources they are authorized for.
